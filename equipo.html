@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Equipo - Novatech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#030d1a] text-white font-sans min-h-screen pb-24">
+    
+    <!-- Encabezado -->
+    <div class="bg-gradient-to-b from-[#0a1e36] to-[#030d1a] p-6 text-center border-b border-blue-900/20">
+        <h1 class="text-xl font-bold tracking-wide">Comunidad Novatech</h1>
+        <p class="text-xs text-gray-400 mt-1">Invita amigos y gana comisiones de 3 niveles</p>
+    </div>
+
+    <div class="p-4 space-y-5 max-w-md mx-auto">
+        
+        <!-- SECCIÓN 1: ENLACE Y CÓDIGO (Dinámicos por usuario) -->
+        <div class="bg-[#07172c] p-5 rounded-2xl border border-blue-900/30 space-y-4 shadow-lg">
+            <div>
+                <p class="text-xs text-gray-400 font-medium">Tu enlace de invitación exclusivo:</p>
+                <!-- Si no hay sesión, mostrará un texto de ayuda en vez de quedarse vacío -->
+                <input id="shareLink" type="text" readonly value="Inicia sesión para ver tu enlace" class="w-full bg-[#030d1a] border border-blue-900/40 text-center p-3 rounded-xl mt-1.5 text-xs text-amber-400 font-bold select-all outline-none">
+            </div>
+
+            <div>
+                <p class="text-xs text-gray-400 font-medium">Tu código de invitación:</p>
+                <div class="flex items-center mt-1.5 space-x-2">
+                    <input id="shareCode" type="text" readonly value="---" class="w-full bg-[#030d1a] border border-blue-900/40 text-center p-3 rounded-xl text-sm text-white font-black select-all outline-none">
+                    <button onclick="alert('¡Copiado!')" class="bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-xl text-xs font-bold transition-all">Copiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: REGLAS DEL SISTEMA DE REFERIDOS -->
+        <div class="bg-[#07172c] p-5 rounded-2xl border border-blue-900/30 shadow-lg space-y-3">
+            <h2 class="text-sm font-bold text-amber-400 flex items-center space-x-2">
+                <span>📜</span> <span>Reglas de Recompensas de Equipo</span>
+            </h2>
+            
+            <div class="space-y-3 pt-1 text-xs leading-relaxed text-gray-300">
+                <div class="flex items-start space-x-2.5">
+                    <span class="bg-amber-500/20 text-amber-400 font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 text-[10px]">1</span>
+                    <p><strong class="text-white">Nivel 1 (Directos):</strong> Ganas el <span class="text-emerald-400 font-bold">10%</span> de comisión de cada recarga o inversión que realicen los amigos que invites directamente con tu enlace.</p>
+                </div>
+
+                <div class="flex items-start space-x-2.5">
+                    <span class="bg-amber-500/20 text-amber-400 font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 text-[10px]">2</span>
+                    <p><strong class="text-white">Nivel 2 (Indirectos):</strong> Si tus invitados de Nivel 1 invitan a otras personas, ellos se convierten en tu Nivel 2 y tú ganas el <span class="text-emerald-400 font-bold">5%</span> de sus movimientos.</p>
+                </div>
+
+                <div class="flex items-start space-x-2.5">
+                    <span class="bg-amber-500/20 text-amber-400 font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 text-[10px]">3</span>
+                    <p><strong class="text-white">Nivel 3 (Comunidad):</strong> Cuando los miembros de tu Nivel 2 inviten a sus propios amigos, recibes el <span class="text-emerald-400 font-bold">2%</span> de comisión de ese tercer grupo.</p>
+                </div>
+
+                <div class="bg-[#030d1a] border border-blue-900/20 p-3 rounded-xl mt-2 text-center text-[11px] text-gray-400">
+                    ⚠️ <span class="italic">Las comisiones se acreditan de forma inmediata en el saldo de tu cuenta Novatech y son completamente retirables.</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Barra de Navegación Inferior Global -->
+    <div class="fixed bottom-0 left-0 right-0 bg-[#051224] border-t border-blue-900/30 grid grid-cols-5 py-2 text-center text-xs text-gray-400 z-50">
+        <a href="hogar.html" class="flex flex-col items-center"><span>🏠</span><span class="mt-0.5">Hogar</span></a>
+        <a href="producto.html" class="flex flex-col items-center"><span>📦</span><span class="mt-0.5">Producto</span></a>
+        <div class="flex flex-col items-center -mt-4"><div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-lg border-4 border-[#030d1a]">V</div></div>
+        <a href="equipo.html" class="flex flex-col items-center text-amber-400"><span>👥</span><span class="mt-0.5">Equipo</span></a>
+        <a href="mio.html" class="flex flex-col items-center"><span>👤</span><span class="mt-0.5">Mío</span></a>
+    </div>
+
+    <!-- Lógica de Firebase para obtener datos del usuario -->
+    <script type="module">
+        import { auth } from "./src/firebase-config.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                // Extrae el número de teléfono del usuario registrado
+                const phone = user.displayName || user.email.split('@')[0];
+                
+                // Genera el enlace dinámico basado en la URL actual de tu web
+                document.getElementById('shareLink').value = `${window.location.origin}/registro.html?ref=${phone}`;
+                
+                // Muestra el código limpio por separado
+                document.getElementById('shareCode').value = phone;
+            }
+        });
+    </script>
+</body>
+</html>

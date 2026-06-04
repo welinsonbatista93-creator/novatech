@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retiro - Novatech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#030d1a] text-white font-sans min-h-screen">
+    <div class="bg-black py-4 px-4 flex items-center justify-between">
+        <a href="mio.html" class="text-white text-xl">❮</a>
+        <h1 class="text-base font-bold tracking-wider">Retiro</h1>
+        <div class="w-4"></div>
+    </div>
+
+    <div class="p-4 space-y-6 max-w-md mx-auto">
+        <div class="bg-gradient-to-r from-blue-950 to-slate-900 p-6 rounded-xl border border-blue-900/20">
+            <p id="currentBalance" class="text-3xl font-black text-white">DOP 0.00</p>
+            <p class="text-gray-400 text-xs mt-1">Saldo de la cuenta</p>
+        </div>
+
+        <a href="gestionar-banco.html" class="bg-[#07172c] border border-blue-900/20 rounded-xl p-4 flex items-center justify-between">
+            <span id="selectedBankLabel" class="text-sm font-medium text-gray-300">Seleccione una cuenta bancaria</span>
+            <span class="text-gray-500">❯</span>
+        </a>
+
+        <div class="space-y-2">
+            <label class="block text-sm font-bold text-gray-300">Monto de retiro</label>
+            <div class="flex items-center border-b border-blue-900/30 py-2">
+                <span class="text-lg font-bold pr-2 text-gray-400">DOP</span>
+                <input id="withdrawalAmount" type="number" placeholder="Importe a retirar" class="bg-transparent w-full text-lg outline-none">
+            </div>
+        </div>
+
+        <div class="flex justify-between text-xs text-gray-400">
+            <span>Recibes: <strong id="netAmount" class="text-emerald-400">DOP 0.00</strong></span>
+            <span>Comisión: <strong class="text-amber-500">15.00%</strong></span>
+        </div>
+
+        <button id="btnSubmitWithdrawal" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 font-bold py-3.5 rounded-lg">
+            Retira tu dinero ahora
+        </button>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import { doc, getDoc, addDoc, collection, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let userBalance = 0;
+        let userHasInvested = false;
+        let savedBankAccount = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if(userDoc.exists()){
+                    const data = userDoc.data();
+                    userBalance = data.balance || 0;
+                    userHasInvested = data.hasInvested || false;
+                    savedBankAccount = data.bankAccount || null;
+
+                    document.getElementById('currentBalance').innerText = `DOP ${userBalance.toFixed(2)}`;
+                    if(savedBankAccount) {
+                        document.getElementById('selectedBankLabel').innerText = `${savedBankAccount.banco} - ${savedBankAccount.cuenta}`;
+                    }
+                }
+            }
+        });
+
+        document.getElementById('withdrawalAmount').addEventListener('input', (e) => {
+            const amount = parseFloat(e.target.value) || 0;
+            document.getElementById('netAmount').innerText = `DOP ${(amount * 0.85).toFixed(2)}`;
+        });
+
+        document.getElementById('btnSubmitWithdrawal').addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('withdrawalAmount').value);
+
+            if(!savedBankAccount) return alert("Registra una cuenta bancaria primero.");
+            if(isNaN(amount) || amount < 200) return alert("Mínimo 200 DOP.");
+            if(amount > userBalance) return alert("Saldo insuficiente.");
+
+            if(userBalance <= 200 && !userHasInvested) {
+                return alert("Para retirar el bono de bienvenida, debes activar un dispositivo Novatech.");
+            }
+
+            try {
+                await addDoc(collection(db, "retiros"), {
+                    userId: auth.currentUser.uid,
+                    monto: amount,
+                    status: "Pendiente",
+                    timestamp: new Date().toLocaleString('es-DO')
+                });
+
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-amount) });
+                alert("Retiro solicitado correctamente.");
+                window.location.href = "mio.html";
+            } catch (e) { alert("Error al procesar."); }
+        });
+    </script>
+</body>
+</html>

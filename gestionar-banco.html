@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuentas Bancarias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#030d1a] text-white font-sans min-h-screen">
+    <div class="bg-black py-4 px-4 flex items-center justify-between">
+        <a href="mio.html" class="text-white text-xl">❮</a>
+        <h1 class="text-base font-bold tracking-wider">Cuentas Vinculadas</h1>
+        <div class="w-4"></div>
+    </div>
+
+    <div class="p-4 space-y-4 max-w-md mx-auto">
+        <div id="containerBanco" class="bg-[#07172c] p-4 rounded-xl border border-blue-900/20 text-sm hidden">
+            <p id="txtBanco" class="font-bold text-amber-400"></p>
+            <p id="txtTitular" class="text-xs text-gray-400 mt-1"></p>
+            <p id="txtCuenta" class="text-xs text-gray-400"></p>
+        </div>
+
+        <p id="txtNoBanco" class="text-center text-xs text-gray-500 py-8">No has agregado ninguna cuenta bancaria.</p>
+
+        <a href="agregar-banco.html" class="block text-center bg-blue-600 text-white font-bold py-3 rounded-xl text-sm">
+            + Vincular Nueva Cuenta
+        </a>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        auth.onAuthStateChanged(async (user) => {
+            if(user) {
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                if(docSnap.exists() && docSnap.data().bankAccount) {
+                    const bank = docSnap.data().bankAccount;
+                    document.getElementById('txtNoBanco').classList.add('hidden');
+                    document.getElementById('containerBanco').classList.remove('hidden');
+                    document.getElementById('txtBanco').innerText = bank.banco;
+                    document.getElementById('txtTitular').innerText = `Titular: ${bank.titular}`;
+                    document.getElementById('txtCuenta').innerText = `No: ${bank.cuenta}`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

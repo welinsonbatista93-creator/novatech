@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo de la suerte</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active-cell { border-color: #f59e0b !important; background-color: rgba(245, 158, 11, 0.2) !important; transform: scale(1.03); }
+    </style>
+</head>
+<body class="bg-[#030d1a] text-white font-sans min-h-screen">
+    <div class="bg-black py-4 px-4 flex items-center justify-between">
+        <a href="mio.html" class="text-white text-xl">❮</a>
+        <h1 class="text-base font-bold tracking-wider">Sorteo de la suerte</h1>
+        <div class="w-4"></div>
+    </div>
+
+    <div class="p-4 max-w-md mx-auto flex flex-col items-center">
+        <div class="bg-red-600 rounded-2xl p-3 w-full grid grid-cols-3 gap-2.5 shadow-2xl mt-6">
+            <div data-index="0" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">10 DOP</span></div>
+            <div data-index="1" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">20 DOP</span></div>
+            <div data-index="2" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">30 DOP</span></div>
+            <div data-index="7" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">100 DOP</span></div>
+            <button id="btnGirar" class="bg-yellow-400 text-red-950 font-black text-lg rounded-xl flex items-center justify-center">GIRAR</button>
+            <div data-index="3" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">40 DOP</span></div>
+            <div data-index="6" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">70 DOP</span></div>
+            <div data-index="5" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">60 DOP</span></div>
+            <div data-index="4" class="bg-white rounded-xl py-4 flex flex-col items-center text-gray-900 font-bold border-4 border-transparent transition-all"><span>🇩🇴</span><span class="text-sm text-[#b81d24]">50 DOP</span></div>
+        </div>
+
+        <div class="w-full bg-[#c29847] text-[#3d2706] rounded-xl p-5 mt-8 font-bold text-center">
+            <p id="displayPremio" class="text-2xl font-black">DOP 0</p>
+            <p class="text-xs font-semibold opacity-80 mt-0.5">Premio acumulado</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import { doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const cachePremios = { 0: 10, 1: 20, 2: 30, 3: 40, 4: 50, 5: 60, 6: 70, 7: 100 };
+        let iteradorGiro = 0, ejecutandoRuleta = false;
+
+        document.getElementById('btnGirar').addEventListener('click', () => {
+            if (ejecutandoRuleta) return;
+            ejecutandoRuleta = true;
+
+            let ticksEjecutados = 0, velocidadActual = 70;
+            const totalTicksMecanicos = 20 + Math.floor(Math.random() * 8);
+
+            function cicloAnimacion() {
+                const anteriorCell = document.querySelector(`[data-index="${iteradorGiro}"]`);
+                if(anteriorCell) anteriorCell.classList.remove('active-cell');
+
+                iteradorGiro = (iteradorGiro + 1) % 8;
+                const cuadroActual = document.querySelector(`[data-index="${iteradorGiro}"]`);
+                if(cuadroActual) cuadroActual.classList.add('active-cell');
+
+                ticksEjecutados++;
+                if (ticksEjecutados < totalTicksMecanicos) {
+                    if (totalTicksMecanicos - ticksEjecutados < 6) velocidadActual += 45;
+                    setTimeout(cicloAnimacion, velocidadActual);
+                } else {
+                    const premioFinal = cachePremios[iteradorGiro];
+                    document.getElementById('displayPremio').innerText = `DOP ${premioFinal}`;
+                    salvarPremio(premioFinal);
+                }
+            }
+            cicloAnimacion();
+        });
+
+        async function salvarPremio(monto) {
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(monto) });
+                alert(`¡Ganaste DOP ${monto}!`);
+                ejecutandoRuleta = false;
+            } catch (e) { ejecutandoRuleta = false; }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - Novatech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#030d1a] text-white font-sans min-h-screen pb-24">
+    
+    <!-- Encabezado -->
+    <div class="bg-black py-4 px-4 text-center border-b border-blue-900/20">
+        <h1 class="text-base font-bold tracking-wider">Dispositivos VIP Novatech</h1>
+    </div>
+
+    <!-- Lista de Productos -->
+    <div class="p-4 space-y-4 max-w-md mx-auto">
+        
+        <!-- Producto VIP 1 -->
+        <div class="bg-[#07172c] border border-blue-900/30 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <h3 class="text-lg font-bold text-amber-400">Servidor Novatech Alpha - VIP 1</h3>
+                <div class="mt-2 space-y-1">
+                    <p class="text-xs text-gray-400">Precio: <span class="text-white font-bold">300 DOP</span></p>
+                    <p class="text-xs text-gray-400">Rendimiento: <span class="text-emerald-400 font-bold">15 DOP / Diario</span></p>
+                </div>
+            </div>
+            <button onclick="comprarProducto(300, 1)" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-3 rounded-xl mt-4 text-sm active:scale-95 transition-all">
+                Invertir ahora
+            </button>
+        </div>
+
+        <!-- Producto VIP 2 -->
+        <div class="bg-[#07172c] border border-blue-900/30 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <h3 class="text-lg font-bold text-amber-400">Servidor Novatech Beta - VIP 2</h3>
+                <div class="mt-2 space-y-1">
+                    <p class="text-xs text-gray-400">Precio: <span class="text-white font-bold">600 DOP</span></p>
+                    <p class="text-xs text-gray-400">Rendimiento: <span class="text-emerald-400 font-bold">32 DOP / Diario</span></p>
+                </div>
+            </div>
+            <button onclick="comprarProducto(600, 2)" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-3 rounded-xl mt-4 text-sm active:scale-95 transition-all">
+                Invertir ahora
+            </button>
+        </div>
+
+        <!-- Producto VIP 3 -->
+        <div class="bg-[#07172c] border border-blue-900/30 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <h3 class="text-lg font-bold text-amber-400">Quantum Node - VIP 3</h3>
+                <div class="mt-2 space-y-1">
+                    <p class="text-xs text-gray-400">Precio: <span class="text-white font-bold">1,200 DOP</span></p>
+                    <p class="text-xs text-gray-400">Rendimiento: <span class="text-emerald-400 font-bold">70 DOP / Diario</span></p>
+                </div>
+            </div>
+            <button onclick="comprarProducto(1200, 3)" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-3 rounded-xl mt-4 text-sm active:scale-95 transition-all">
+                Invertir ahora
+            </button>
+        </div>
+
+        <!-- Producto VIP 4 -->
+        <div class="bg-[#07172c] border border-blue-900/30 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+            <div>
+                <h3 class="text-lg font-bold text-amber-400">Mainframe Titan - VIP 4</h3>
+                <div class="mt-2 space-y-1">
+                    <p class="text-xs text-gray-400">Precio: <span class="text-white font-bold">2,500 DOP</span></p>
+                    <p class="text-xs text-gray-400">Rendimiento: <span class="text-emerald-400 font-bold">150 DOP / Diario</span></p>
+                </div>
+            </div>
+            <button onclick="comprarProducto(2500, 4)" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-3 rounded-xl mt-4 text-sm active:scale-95 transition-all">
+                Invertir ahora
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Barra de Navegación Inferior Global -->
+    <div class="fixed bottom-0 left-0 right-0 bg-[#051224] border-t border-blue-900/30 grid grid-cols-5 py-2 text-center text-xs text-gray-400 z-50">
+        <a href="hogar.html" class="flex flex-col items-center"><span>🏠</span><span class="mt-0.5">Hogar</span></a>
+        <a href="producto.html" class="flex flex-col items-center text-amber-400"><span>📦</span><span class="mt-0.5">Producto</span></a>
+        <div class="flex flex-col items-center -mt-4"><div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-lg border-4 border-[#030d1a]">V</div></div>
+        <a href="equipo.html" class="flex flex-col items-center"><span>👥</span><span class="mt-0.5">Equipo</span></a>
+        <a href="mio.html" class="flex flex-col items-center"><span>👤</span><span class="mt-0.5">Mío</span></a>
+    </div>
+
+    <!-- Lógica de compra automática -->
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        window.comprarProducto = async function(costo, nivelVip) {
+            const user = auth.currentUser;
+            if(!user) return alert("Inicia sesión primero.");
+
+            const userRef = doc(db, "users", user.uid);
+            try {
+                const userSnap = await getDoc(userRef);
+
+                if(userSnap.exists()) {
+                    const saldo = userSnap.data().balance || 0;
+                    if(saldo < costo) return alert("Saldo insuficiente. Por favor realiza un depósito.");
+
+                    await updateDoc(userRef, {
+                        balance: increment(-costo),
+                        vipLevel: nivelVip,
+                        hasInvested: true
+                    });
+                    alert(`¡Inversión exitosa! Tu dispositivo VIP ${nivelVip} ya está activo.`);
+                }
+            } catch (error) {
+                alert("Hubo un problema al procesar la inversión.");
+            }
+        }
+    </script>
+</body>
+</html>

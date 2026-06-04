@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - Novatech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#030d1a] text-white font-sans min-h-screen pb-24">
+    <div class="bg-gradient-to-b from-[#0a1e36] to-[#030d1a] px-5 pt-8 pb-6 border-b border-blue-900/20">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center font-bold text-xl border-2 border-blue-400">N</div>
+                <div>
+                    <h2 id="displayPhone" class="text-xl font-bold tracking-wide">Cargando...</h2>
+                    <p class="text-gray-400 text-xs mt-0.5">Número de teléfono</p>
+                </div>
+            </div>
+            <div class="bg-gradient-to-r from-amber-500 to-yellow-400 text-[#4a2306] font-black text-xs px-3 py-1.5 rounded-full flex items-center space-x-1 shadow-md">
+                <span>👑</span><span id="displayVIP">VIP 0</span>
+            </div>
+        </div>
+
+        <div class="bg-[#07172c]/90 rounded-xl p-5 mt-6 grid grid-cols-2 gap-4 border border-blue-900/30">
+            <div class="text-center border-r border-blue-900/40">
+                <p id="displayBalance" class="text-xl font-black text-amber-400">DOP 0.00</p>
+                <p class="text-gray-400 text-xs mt-1">Saldo de la cuenta</p>
+            </div>
+            <div class="text-center">
+                <p id="displayGanancias" class="text-xl font-black text-emerald-400">DOP 0.00</p>
+                <p class="text-gray-400 text-xs mt-1">Ingresos acumulados</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 px-4 mt-4">
+        <a href="recargar.html" class="bg-gradient-to-r from-amber-500 to-amber-600 text-center py-3.5 rounded-xl font-bold text-sm shadow-md flex items-center justify-center space-x-2">
+            <span>💳</span> <span>Recargar</span>
+        </a>
+        <a href="retiro.html" class="bg-gradient-to-r from-amber-600 to-yellow-600 text-center py-3.5 rounded-xl font-bold text-sm shadow-md flex items-center justify-center space-x-2">
+            <span>📥</span> <span>Retirar dinero</span>
+        </a>
+    </div>
+
+    <div class="px-4 mt-6">
+        <div class="bg-[#07172c] rounded-xl divide-y divide-blue-900/20 overflow-hidden border border-blue-900/20">
+            <a href="sorteo.html" class="flex items-center justify-between px-4 py-4 hover:bg-blue-900/10">
+                <div class="flex items-center space-x-3"><span class="text-amber-400">▶</span> <span class="font-medium text-sm">Sorteo de la suerte</span></div>
+                <span class="text-gray-500 text-sm">❯</span>
+            </a>
+            <a href="https://chat.whatsapp.com/IfgCgvipDkhK9lkXoq99wW" target="_blank" class="flex items-center justify-between px-4 py-4 hover:bg-blue-900/10">
+                <div class="flex items-center space-x-3"><span class="text-emerald-400">🎧</span> <span class="font-medium text-sm">Servicio al cliente (WhatsApp)</span></div>
+                <span class="text-gray-500 text-sm">❯</span>
+            </a>
+            <a href="gestionar-banco.html" class="flex items-center justify-between px-4 py-4 hover:bg-blue-900/10">
+                <div class="flex items-center space-x-3"><span class="text-indigo-400">💳</span> <span class="font-medium text-sm">Gestión de retiros bancarios</span></div>
+                <span class="text-gray-500 text-sm">❯</span>
+            </a>
+            <button id="btnLogout" class="w-full flex items-center justify-between px-4 py-4 text-red-400 text-left">
+                <div class="flex items-center space-x-3"><span>⚡</span> <span class="font-medium text-sm">Finalizar la sesión</span></div>
+                <span class="text-red-400/50 text-sm">❯</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-[#051224] border-t border-blue-900/30 grid grid-cols-5 py-2 text-center text-xs text-gray-400 z-50">
+        <a href="hogar.html" class="flex flex-col items-center"><span>🏠</span><span class="mt-0.5">Hogar</span></a>
+        <a href="producto.html" class="flex flex-col items-center"><span>📦</span><span class="mt-0.5">Producto</span></a>
+        <div class="flex flex-col items-center -mt-4"><div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-lg border-4 border-[#030d1a]">V</div></div>
+        <a href="equipo.html" class="flex flex-col items-center"><span>👥</span><span class="mt-0.5">Equipo</span></a>
+        <a href="mio.html" class="flex flex-col items-center text-amber-400"><span>👤</span><span class="mt-0.5">Mío</span></a>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('displayPhone').innerText = user.displayName || user.email.split('@')[0];
+                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                    if(docSnap.exists()){
+                        const data = docSnap.data();
+                        document.getElementById('displayBalance').innerText = `DOP ${parseFloat(data.balance || 0).toFixed(2)}`;
+                        document.getElementById('displayGanancias').innerText = `DOP ${parseFloat(data.ganancias || 0).toFixed(2)}`;
+                        document.getElementById('displayVIP').innerText = `VIP ${data.vipLevel || 0}`;
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.href = "index.html");
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Cuenta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#030d1a] text-white font-sans min-h-screen">
+    <div class="bg-black py-4 px-4 flex items-center justify-between">
+        <a href="gestionar-banco.html" class="text-white text-xl">❮</a>
+        <h1 class="text-base font-bold tracking-wider">Agregar cuenta bancaria</h1>
+        <div class="w-4"></div>
+    </div>
+
+    <div class="p-6 space-y-6 max-w-md mx-auto">
+        <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-300">*Seleccione el tipo de banco</label>
+            <select id="bankType" class="w-full bg-[#10223b] border border-blue-900/40 rounded-lg px-4 py-3 text-white outline-none">
+                <option value="" disabled selected>Por favor, seleccione</option>
+                <option value="Banreservas">Banreservas</option>
+                <option value="Banco Popular">Banco Popular</option>
+            </select>
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-300">*Nombre Completo</label>
+            <input id="holderName" type="text" placeholder="Nombre del titular" class="w-full bg-[#10223b] border border-blue-900/40 rounded-lg px-4 py-3 text-white outline-none">
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-300">*Número de cuenta</label>
+            <input id="accountNumber" type="number" placeholder="Número de cuenta bancaria" class="w-full bg-[#10223b] border border-blue-900/40 rounded-lg px-4 py-3 text-white outline-none">
+        </div>
+
+        <button id="btnSaveBank" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 font-bold py-3.5 rounded-xl">
+            Guardar Cuenta
+        </button>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        document.getElementById('btnSaveBank').addEventListener('click', async () => {
+            const banco = document.getElementById('bankType').value;
+            const titular = document.getElementById('holderName').value.trim();
+            const cuenta = document.getElementById('accountNumber').value.trim();
+
+            if(!banco || !titular || !cuenta) return alert("Rellena todos los campos.");
+
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    bankAccount: { banco, titular, cuenta }
+                });
+                alert("Cuenta vinculada exitosamente.");
+                window.location.href = "gestionar-banco.html";
+            } catch (e) { alert("Error al guardar."); }
+        });
+    </script>
+</body>
+</html>

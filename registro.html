@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Novatech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#04142c] text-white min-h-screen flex flex-col justify-between font-sans">
+    <div class="px-6 pt-12 flex flex-col items-start w-full max-w-md mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Crear cuenta Novatech</h1>
+        
+        <div class="w-full space-y-4">
+            <div class="flex bg-white rounded-lg overflow-hidden border border-gray-300">
+                <span class="bg-gray-100 text-gray-700 px-4 flex items-center font-semibold">+1</span>
+                <input id="phone" type="tel" placeholder="Número de móvil" class="w-full px-4 py-3 text-gray-900 outline-none">
+            </div>
+            <input id="password" type="password" placeholder="Establecer contraseña" class="w-full bg-white text-gray-900 px-4 py-3 rounded-lg outline-none border border-gray-300">
+            <input id="refCode" type="text" placeholder="Código de invitación (Opcional)" class="w-full bg-white text-gray-900 px-4 py-3 rounded-lg outline-none border border-gray-300">
+
+            <button id="btnRegister" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 font-bold py-3.5 rounded-lg mt-4 active:scale-95 transition-all">
+                Registrarse ahora
+            </button>
+            <a href="index.html" class="block text-center text-sm text-gray-400 mt-2 hover:underline">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./src/firebase-config.js";
+        import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        document.getElementById('btnRegister').addEventListener('click', async () => {
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const refCode = document.getElementById('refCode').value.trim();
+
+            if(!phone || password.length < 6) return alert('El teléfono es requerido y la contraseña debe tener mínimo 6 caracteres.');
+            const fakeEmail = `${phone}@novatech.com`;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, password);
+                await updateProfile(userCredential.user, { displayName: phone });
+
+                // Se otorgan los 200 DOP de bienvenida automáticamente
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    phone: phone,
+                    balance: 200,
+                    ganancias: 0,
+                    vipLevel: 0,
+                    hasInvested: false,
+                    referredBy: refCode || null,
+                    timestamp: new Date().toLocaleString('es-DO')
+                });
+
+                alert('¡Cuenta creada con éxito! Recibiste un bono de 200 DOP.');
+                window.location.href = "hogar.html";
+            } catch (error) {
+                alert("Error en el registro. Es posible que el número ya exista.");
+            }
+        });
+    </script>
+</body>
+</html>
